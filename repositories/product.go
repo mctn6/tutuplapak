@@ -197,7 +197,7 @@ func (r *ProductRepository) GetProductById(id int) (*models.Product, error) {
 		FROM products
 		JOIN files
 		ON files.fileid = products.fileid
-		WHERE productId = $1
+		WHERE products.id = $1
 	`
 
 	var product models.Product
@@ -221,7 +221,7 @@ func (r *ProductRepository) GetProductById(id int) (*models.Product, error) {
 	return &product, nil
 }
 
-func (r *ProductRepository) UpdateProduct(id int, updatedProduct models.Product) error {
+func (r *ProductRepository) UpdateProduct(id int, req dto.UpdateProductRequest) error {
 	query := `
 		UPDATE products
 		SET name = $1, category = $2, qty = $3, price = $4, sku = $5, fileId = $6
@@ -230,12 +230,12 @@ func (r *ProductRepository) UpdateProduct(id int, updatedProduct models.Product)
 
 	_, err := r.DB.Exec(
 		query,
-		updatedProduct.Name,
-		updatedProduct.Category,
-		updatedProduct.Qty,
-		updatedProduct.Price,
-		updatedProduct.SKU,
-		updatedProduct.FileID,
+		req.Name,
+		req.Category,
+		req.Qty,
+		req.Price,
+		req.SKU,
+		req.FileID,
 		id,
 	)
 	return err
@@ -261,7 +261,7 @@ func (r *ProductRepository) DeleteProduct(id int) error {
 	return nil
 }
 
-func (r *ProductRepository) FileExists(fileId string) (bool, error) {
+func (r *ProductRepository) IsFileExists(fileId string) (bool, error) {
 	var exists bool
 	query := `SELECT EXISTS(SELECT 1 FROM files WHERE fileId = $1)`
 	err := db.DB.QueryRow(query, fileId).Scan(&exists)

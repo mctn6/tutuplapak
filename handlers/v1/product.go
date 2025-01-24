@@ -88,7 +88,7 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	}
 
 	// Validate fileId exists in the database
-	exists, err := h.Repo.FileExists(req.FileID)
+	exists, err := h.Repo.IsFileExists(req.FileID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to validate fileId"})
 		return
@@ -212,7 +212,7 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	if err := h.Repo.UpdateProduct(parsedProductId, *product); err != nil {
+	if err := h.Repo.UpdateProduct(parsedProductId, req); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
 		return
 	}
