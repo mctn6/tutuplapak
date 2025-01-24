@@ -1,21 +1,26 @@
 package main
 
 import (
-	"net/http"
-
-	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
+	"fmt"
+	"log"
+	"tutuplapak/config"
+	"tutuplapak/db"
+	"tutuplapak/routes"
 )
 
 func main() {
-	r := gin.Default()
-	r.Use(cors.Default())
+	cfg := config.LoadConfig()
 
-	r.GET("/hello", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "success",
-		})
-	})
+	db.InitDB(cfg)
+	defer func() {
+		if err := db.DB.Close(); err != nil {
+			log.Fatalf("Failed to close database connection: %v", err)
+		}
+		log.Println("Database connection closed.")
+	}()
 
-	r.Run(":8080")
+	r := routes.SetupRouter(cfg, db.DB)
+
+	fmt.Printf("Starting server on port %s...\n", cfg.AppPort)
+	r.Run(":" + cfg.AppPort)
 }
