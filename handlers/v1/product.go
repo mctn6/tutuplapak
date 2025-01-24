@@ -212,6 +212,17 @@ func (h *ProductHandler) UpdateProduct(c *gin.Context) {
 		return
 	}
 
+	// Validate fileId exists in the database
+	exists, err := h.Repo.IsFileExists(req.FileID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to validate fileId"})
+		return
+	}
+	if !exists {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "fileId does not exist"})
+		return
+	}
+
 	if err := h.Repo.UpdateProduct(parsedProductId, req); err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
 		return

@@ -35,11 +35,11 @@ func (r *ProductRepository) CreateProduct(req dto.CreateProductRequest) (models.
 					inserted_product.sku,
 					inserted_product.created_at,
 					inserted_product.updated_at,
-					files.fileid AS file_id,
-					files.fileuri AS file_uri,
-					files.filethumbnailuri AS file_thumbnail_uri
+					files.id AS file_id,
+					files.original_file_uri AS file_uri,
+					files.compressed_file_uri AS file_thumbnail_uri
 				FROM inserted_product
-				JOIN files ON inserted_product.fileId = files.fileid;
+				JOIN files ON inserted_product.fileId = files.id;
 			`
 
 	var product models.Product
@@ -72,14 +72,14 @@ func (r *ProductRepository) FilterProducts(filters map[string]string) ([]models.
 			products.qty,
 			products.price,
 			products.sku,
-			files.fileid,
-			files.fileuri,
-			files.filethumbnailuri,
+			files.id,
+			files.original_file_uri,
+			files.compressed_file_uri,
 			products.created_at,
 			products.updated_at
 		FROM products
 		JOIN files
-		ON files.fileid = products.fileid
+		ON files.id = products.id
 	`
 
 	args := []interface{}{}
@@ -189,14 +189,14 @@ func (r *ProductRepository) GetProductById(id int) (*models.Product, error) {
 			products.qty,
 			products.price,
 			products.sku,
-			files.fileid,
-			files.fileuri,
-			files.filethumbnailuri,
+			files.id,
+			files.original_file_uri,
+			files.compressed_file_uri,
 			products.created_at,
 			products.updated_at
 		FROM products
 		JOIN files
-		ON files.fileid = products.fileid
+		ON files.id = products.id
 		WHERE products.id = $1
 	`
 
@@ -263,7 +263,7 @@ func (r *ProductRepository) DeleteProduct(id int) error {
 
 func (r *ProductRepository) IsFileExists(fileId string) (bool, error) {
 	var exists bool
-	query := `SELECT EXISTS(SELECT 1 FROM files WHERE fileId = $1)`
+	query := `SELECT EXISTS(SELECT 1 FROM files WHERE id = $1)`
 	err := db.DB.QueryRow(query, fileId).Scan(&exists)
 	if err != nil {
 		return false, err
